@@ -74,7 +74,10 @@ def send_discord_message(summary: dict[str, int | str], webhook_url: str = DISCO
     http_request = request.Request(
         webhook_url,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "SalesDataQualityBot/1.0",
+        },
         method="POST",
     )
     with request.urlopen(http_request, timeout=15) as response:
