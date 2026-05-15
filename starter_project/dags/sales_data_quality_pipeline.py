@@ -16,16 +16,20 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 def validate_orders_task() -> dict:
-    """
-    TODO:
-    1. Import config values.
-    2. Read the input CSV.
-    3. Validate the rows.
-    4. Write the JSON summary.
-    5. Send the Discord alert.
-    6. Raise an error on failed validation.
-    """
-    raise NotImplementedError
+    from src.config import AIRFLOW_INPUT_FILE, DISCORD_WEBHOOK_URL, OUTPUT_DIR
+    from src.validation import LabValidationError, build_summary, read_rows, send_discord_message, write_summary
+
+    rows = read_rows(AIRFLOW_INPUT_FILE)
+    summary = build_summary(rows)
+    output_file = write_summary(summary, OUTPUT_DIR / "validation_summary.json")
+
+    if DISCORD_WEBHOOK_URL:
+        send_discord_message(summary, DISCORD_WEBHOOK_URL)
+
+    if summary["validation_status"] == "failed":
+        raise LabValidationError(f"Validation failed. Summary saved to {output_file}")
+
+    return summary
 
 
 if DAG is not None:
